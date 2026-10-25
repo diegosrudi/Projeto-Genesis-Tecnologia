@@ -1,6 +1,9 @@
 import styles from "./Navbar.module.css"
+import { useTheme } from "../../context/ThemeContext"
 
 export default function Navbar() {
+  const { theme, toggleTheme } = useTheme()
+
   return (
     <header className={styles.header}>
       <div className={styles.navContainer}>
@@ -16,6 +19,17 @@ export default function Navbar() {
           <li><a href="#contato">Contato</a></li>
         </ul>
 
+        <div className={styles.actionsContainer}>
+          <button
+            type="button"
+            className={styles.themeToggleBtn}
+            onClick={toggleTheme}
+            aria-label="Alternar tema claro e escuro"
+            title={theme === "dark" ? "Mudar para modo claro" : "Mudar para modo escuro"}
+          >
+            {theme === "dark" ? "☀️" : "🌙"}
+          </button>
+
         <a 
           href="https://wa.me/" 
           target="_blank" 
@@ -25,6 +39,7 @@ export default function Navbar() {
           Falar no WhatsApp
         </a>
       </div>
+     </div>
     </header>
   )
 }
