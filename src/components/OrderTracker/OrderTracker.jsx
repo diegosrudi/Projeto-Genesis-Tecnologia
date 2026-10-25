@@ -1,39 +1,7 @@
 import { useState } from "react"
 import styles from "./OrderTracker.module.css"
 
-// Base de dados simulada de Ordens de Serviço
-const MOCK_ORDERS = {
-  "OS-1001": {
-    code: "OS-1001",
-    client: "Carlos Eduardo",
-    device: "Dell Vostro 3500",
-    service: "Reparo no circuito de carga (Charger) e troca de bateria",
-    currentStep: 2, // 1: Recebido, 2: Em Bancada, 3: Testes de Stress, 4: Pronto
-    statusLabel: "Em Bancada",
-    statusType: "statusEmBancada",
-    report: "Curto identificado na linha de entrada de 19V e mosfet de alta substituído. Equipamento atualmente na bancada a carregar a nova bateria para testes térmicos."
-  },
-  "OS-1002": {
-    code: "OS-1002",
-    client: "Mariana Souza",
-    device: "Epson EcoTank L1250",
-    service: "Desobstrução de cabeça de impressão e substituição de almofadas",
-    currentStep: 4,
-    statusLabel: "Pronto para Levantamento",
-    statusType: "statusConcluido",
-    report: "Despressurização concluída com sucesso. Alinhamento de jatos a 100% e reset lógico executado. Pronto para retirada pelo cliente."
-  },
-  "OS-1003": {
-    code: "OS-1003",
-    client: "AgroTech Serviços",
-    device: "Receptor GPS Topcon AGI-4",
-    service: "Troca de bateria interna e análise de sinal GNSS",
-    currentStep: 1,
-    statusLabel: "Aguardando Peça",
-    statusType: "statusAguardando",
-    report: "Bateria original sem retenção de carga. Encomenda de célula de lítio especializada TL-4986 efetuada com fornecedor parceiro."
-  }
-}
+const API_URL = import.meta.env.VITE_ORDERS_API_URL
 
 const STEPS = [
   { id: 1, label: "Recebido" },
@@ -48,7 +16,7 @@ export default function OrderTracker() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault()
     const sanitizedCode = searchCode.trim().toUpperCase()
 
@@ -62,17 +30,31 @@ export default function OrderTracker() {
     setError("")
     setOrder(null)
 
-    // Simula uma resposta de API assíncrona com atraso de 800ms
-    setTimeout(() => {
-      const foundOrder = MOCK_ORDERS[sanitizedCode]
+    try {
+      if (!API_URL) {
+        throw new Error("URL da API não configurado no ficheiro .env.")
+      }
+
+      const response = await fetch(API_URL)
+      
+      if (!response.ok) {
+        throw new Error("Não foi possível estabelecer ligação à base de dados de ordens.")
+      }
+
+      const allOrders = await response.json()
+      const foundOrder = allOrders[sanitizedCode]
 
       if (foundOrder) {
         setOrder(foundOrder)
       } else {
         setError(`A Ordem de Serviço "${sanitizedCode}" não foi encontrada. Verifique o código e tente novamente.`)
       }
+    } catch (err) {
+      console.error("Erro na consulta:", err)
+      setError(err.message || "Ocorreu um erro ao consultar os dados. Tente novamente mais tarde.")
+    } finally {
       setIsLoading(false)
-    }, 800)
+    }
   }
 
   return (
@@ -100,7 +82,7 @@ export default function OrderTracker() {
         </form>
 
         <p className={styles.tips}>
-          Dica para teste rápido: tente consultar <code>OS-1001</code>, <code>OS-1002</code> ou <code>OS-1003</code>.
+          Dica para teste rápido: tente consultar <code>OS-1001</code>.
         </p>
 
         {error && <div className={styles.errorMessage}>{error}</div>}
@@ -112,7 +94,7 @@ export default function OrderTracker() {
                 <h3>{order.device} — {order.code}</h3>
                 <p className={styles.clientInfo}>Cliente: {order.client} | Serviço: {order.service}</p>
               </div>
-              <span className={`${styles.statusBadge} ${styles[order.statusType]}`}>
+              <span className={`${styles.statusBadge} ${styles[order.statusType] || styles.statusEmBancada}`}>
                 {order.statusLabel}
               </span>
             </div>
