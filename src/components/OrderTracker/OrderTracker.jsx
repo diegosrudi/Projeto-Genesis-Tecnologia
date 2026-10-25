@@ -16,11 +16,36 @@ export default function OrderTracker() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
+  // Função para aplicar máscara automática: transforma qualquer entrada em "OS-XXXX"
+  const handleInputChange = (e) => {
+    let raw = e.target.value.toUpperCase()
+
+    // Remove qualquer texto que não seja letra ou número
+    // Se o utilizador apagar tudo, limpa o campo
+    if (!raw) {
+      setSearchCode("")
+      return
+    }
+
+    // Remove o prefixo "OS" e traços existentes para extrair apenas o identificador/número
+    let cleaned = raw.replace(/^OS-?/, "").replace(/[^A-Z0-9]/g, "")
+
+    // Limita o tamanho do código numérico (ex: até 5 caracteres)
+    cleaned = cleaned.slice(0, 5)
+
+    // Formata com o prefixo padrão
+    if (cleaned.length > 0) {
+      setSearchCode(`OS-${cleaned}`)
+    } else {
+      setSearchCode("")
+    }
+  }
+
   const handleSearch = async (e) => {
     e.preventDefault()
     const sanitizedCode = searchCode.trim().toUpperCase()
 
-    if (!sanitizedCode) {
+    if (!sanitizedCode || sanitizedCode === "OS-") {
       setError("Por favor, introduza o número da sua Ordem de Serviço.")
       setOrder(null)
       return
@@ -36,7 +61,7 @@ export default function OrderTracker() {
       }
 
       const response = await fetch(API_URL)
-      
+
       if (!response.ok) {
         throw new Error("Não foi possível estabelecer ligação à base de dados de ordens.")
       }
@@ -72,9 +97,10 @@ export default function OrderTracker() {
           <input
             type="text"
             className={styles.input}
-            placeholder="Ex: OS-1001"
+            placeholder="Ex: 1001 ou OS-1001"
             value={searchCode}
-            onChange={(e) => setSearchCode(e.target.value)}
+            onChange={handleInputChange}
+            maxLength={8}
           />
           <button type="submit" className={styles.searchBtn} disabled={isLoading}>
             {isLoading ? "A consultar..." : "Consultar OS"}
@@ -82,7 +108,7 @@ export default function OrderTracker() {
         </form>
 
         <p className={styles.tips}>
-          Dica para teste rápido: tente consultar <code>OS-1001</code>.
+          Dica para teste rápido: digite apenas <code>1001</code> e a máscara completará automaticamente.
         </p>
 
         {error && <div className={styles.errorMessage}>{error}</div>}
