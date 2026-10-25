@@ -11,6 +11,7 @@ export default function Navbar() {
         <ul className={styles.navLinks}>
           <li><a href="#inicio">Início</a></li>
           <li><a href="#servicos">Serviços</a></li>
+          <li><a href="#diagnostico">Diagnóstico</a></li>
           <li><a href="#sobre">Sobre</a></li>
           <li><a href="#contato">Contato</a></li>
         </ul>
