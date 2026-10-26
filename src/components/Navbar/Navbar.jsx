@@ -1,6 +1,7 @@
 import { useState } from "react"
 import styles from "./Navbar.module.css"
 
+
 export default function Navbar({ theme, toggleTheme }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
@@ -15,9 +16,16 @@ export default function Navbar({ theme, toggleTheme }) {
   return (
     <nav className={styles.navbar}>
       <div className={styles.container}>
-        {/* Logótipo / Marca */}
+        {/* Marca com Logo e Nome */}
         <a href="#inicio" className={styles.brand} onClick={closeMenu}>
-          <span className={styles.brandAccent}>Genesis</span> Tecnologia
+          <img
+            src="/logo.png"
+            alt="Genesis Tecnologia Logo"
+            className={styles.brandLogo}
+          />
+          {/* <span className={styles.brandText}>
+            <span className={styles.brandAccent}>Genesis</span> Tecnologia
+          </span> */}
         </a>
 
         {/* Links Desktop */}
@@ -30,8 +38,8 @@ export default function Navbar({ theme, toggleTheme }) {
           <li><a href="#contato">Contato</a></li>
         </ul>
 
-        {/* Ações da direita: Botão de Tema e Botão Hambúrguer */}
-        <div className={styles.actions}>
+        {/* Ações da direita */}
+        <div className={styles.actions}>          
           <button
             type="button"
             className={styles.themeToggle}
@@ -41,6 +49,7 @@ export default function Navbar({ theme, toggleTheme }) {
             {theme === "light" ? "🌙" : "☀️"}
           </button>
 
+          {/* Botão Hambúrguer Mobile */}
           <button
             type="button"
             className={`${styles.hamburger} ${isMenuOpen ? styles.hamburgerActive : ""}`}
@@ -55,7 +64,7 @@ export default function Navbar({ theme, toggleTheme }) {
         </div>
       </div>
 
-      {/* Gaveta / Menu Mobile */}
+      {/* Menu Gaveta Mobile */}
       <div className={`${styles.mobileDrawer} ${isMenuOpen ? styles.drawerOpen : ""}`}>
         <ul className={styles.mobileLinks}>
           <li><a href="#inicio" onClick={closeMenu}>Início</a></li>
